@@ -96,8 +96,9 @@ export function exportToPDF(data: ExportData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
-        margin: 40,
-        size: 'A4'
+        margin: 25,
+        size: 'A4',
+        bufferPages: true
       })
       
       const chunks: Buffer[] = []
@@ -107,51 +108,120 @@ export function exportToPDF(data: ExportData): Promise<Buffer> {
       doc.on('error', reject)
       
       // Title
-      doc.fontSize(18).font('Helvetica-Bold').text('Test Cases Report', { align: 'center' })
-      doc.moveDown(0.5)
+      doc.fontSize(16).font('Helvetica-Bold').text('Test Cases Report', { align: 'center' })
+      doc.moveDown(0.8)
       
-      // Table header
-      const tableTop = doc.y
+      // Column widths and positions
+      const leftMargin = 25
+      const pageWidth = 550 // A4 width minus margins
       const colWidths = {
         id: 50,
-        title: 120,
-        category: 70,
-        expected: 120
+        title: 140,
+        category: 80,
+        expected: 280
       }
       
-      const headerY = doc.y
-      doc.fontSize(9).font('Helvetica-Bold')
+      // Helper function to draw header
+      const drawHeader = () => {
+        const headerY = doc.y
+        const headerHeight = 22
+        
+        // Header background
+        doc.rect(leftMargin, headerY, pageWidth, headerHeight)
+          .fillAndStroke('#0052CC', '#0052CC')
+        
+        // Header text
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#FFFFFF')
+        
+        let xPos = leftMargin + 4
+        doc.text('ID', xPos, headerY + 6, { width: colWidths.id, align: 'center' })
+        
+        xPos += colWidths.id
+        doc.text('Title', xPos, headerY + 6, { width: colWidths.title, align: 'left' })
+        
+        xPos += colWidths.title
+        doc.text('Category', xPos, headerY + 6, { width: colWidths.category, align: 'center' })
+        
+        xPos += colWidths.category
+        doc.text('Expected Result', xPos, headerY + 6, { width: colWidths.expected, align: 'left' })
+        
+        doc.moveDown(1.8)
+      }
       
-      // Header cells
-      doc.rect(40, headerY, colWidths.id, 20).fillAndStroke('#0052CC', '#000')
-      doc.fillColor('#FFFFFF').text('ID', 45, headerY + 4, { width: colWidths.id - 10, align: 'left' })
+      // Draw initial header
+      drawHeader()
       
-      doc.fillColor('#000').rect(40 + colWidths.id, headerY, colWidths.title, 20).fillAndStroke('#0052CC', '#000')
-      doc.fillColor('#FFFFFF').text('Title', 45 + colWidths.id, headerY + 4, { width: colWidths.title - 10, align: 'left' })
+      // Draw rows
+      doc.fontSize(8).font('Helvetica').fillColor('#000000')
       
-      doc.fillColor('#000').rect(40 + colWidths.id + colWidths.title, headerY, colWidths.category, 20).fillAndStroke('#0052CC', '#000')
-      doc.fillColor('#FFFFFF').text('Category', 45 + colWidths.id + colWidths.title, headerY + 4, { width: colWidths.category - 10, align: 'left' })
-      
-      doc.fillColor('#000').rect(40 + colWidths.id + colWidths.title + colWidths.category, headerY, colWidths.expected, 20).fillAndStroke('#0052CC', '#000')
-      doc.fillColor('#FFFFFF').text('Expected Result', 45 + colWidths.id + colWidths.title + colWidths.category, headerY + 4, { width: colWidths.expected - 10, align: 'left' })
-      
-      doc.moveDown()
-      doc.fillColor('#000')
-      
-      // Table rows
       data.cases.forEach((testCase, index) => {
         const rowY = doc.y
-        const bgColor = index % 2 === 0 ? '#F8F9FA' : '#FFFFFF'
+        const rowHeight = 35
         
-        doc.rect(40, rowY, colWidths.id + colWidths.title + colWidths.category + colWidths.expected, 20).fill(bgColor)
+        // Alternate row background
+        const bgColor = index % 2 === 0 ? '#F9F9F9' : '#FFFFFF'
+        doc.rect(leftMargin, rowY, pageWidth, rowHeight).fill(bgColor)
         
-        doc.fontSize(8).font('Helvetica')
-        doc.text(testCase.id, 45, rowY + 4, { width: colWidths.id - 10, align: 'left' })
-        doc.text(testCase.title, 45 + colWidths.id, rowY + 4, { width: colWidths.title - 10, align: 'left' })
-        doc.text(testCase.category, 45 + colWidths.id + colWidths.title, rowY + 4, { width: colWidths.category - 10, align: 'left' })
-        doc.text(testCase.expectedResult, 45 + colWidths.id + colWidths.title + colWidths.category, rowY + 4, { width: colWidths.expected - 10, align: 'left' })
+        // Row border
+        doc.strokeColor('#DDDDDD').lineWidth(0.5)
+        doc.rect(leftMargin, rowY, pageWidth, rowHeight).stroke()
         
-        doc.moveDown()
+        // Vertical column dividers
+        let dividerX = leftMargin + colWidths.id
+        doc.moveTo(dividerX, rowY).lineTo(dividerX, rowY + rowHeight).stroke()
+        
+        dividerX += colWidths.title
+        doc.moveTo(dividerX, rowY).lineTo(dividerX, rowY + rowHeight).stroke()
+        
+        dividerX += colWidths.category
+        doc.moveTo(dividerX, rowY).lineTo(dividerX, rowY + rowHeight).stroke()
+        
+        // Fill text with proper positioning
+        doc.fillColor('#000000')
+        const padding = 3
+        
+        // ID column
+        let xPos = leftMargin + 4
+        doc.text(testCase.id, xPos, rowY + 4, {
+          width: colWidths.id - 2,
+          align: 'center',
+          height: rowHeight - 8
+        })
+        
+        // Title column
+        xPos = leftMargin + colWidths.id + padding
+        doc.text(testCase.title, xPos, rowY + 4, {
+          width: colWidths.title - 8,
+          align: 'left',
+          height: rowHeight - 8,
+          lineGap: 2
+        })
+        
+        // Category column
+        xPos = leftMargin + colWidths.id + colWidths.title + padding
+        doc.text(testCase.category, xPos, rowY + 4, {
+          width: colWidths.category - 8,
+          align: 'center',
+          height: rowHeight - 8
+        })
+        
+        // Expected Result column
+        xPos = leftMargin + colWidths.id + colWidths.title + colWidths.category + padding
+        doc.text(testCase.expectedResult, xPos, rowY + 4, {
+          width: colWidths.expected - 8,
+          align: 'left',
+          height: rowHeight - 8,
+          lineGap: 1
+        })
+        
+        doc.moveDown(2.2)
+        
+        // Add new page if needed
+        if (doc.y > doc.page.height - 50) {
+          doc.addPage()
+          drawHeader()
+          doc.fontSize(8).font('Helvetica').fillColor('#000000')
+        }
       })
       
       doc.end()

@@ -1,0 +1,86 @@
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+    }
+    .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .header {
+        background-color: #00698f; /* TD Bank blue */
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    .table th {
+        background-color: #f0f0f0;
+    }
+    .summary {
+        margin-top: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="header">
+        <h2>Code Review Report</h2>
+    </div>
+    <table class="table">
+        <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Score (out of 20)</th>
+        </tr>
+        <tr>
+            <td>Code Readability</td>
+            <td>Naming conventions are clear, but indentation and structure can be improved. Comments or documentation are missing.</td>
+            <td>14</td>
+        </tr>
+        <tr>
+            <td>Code Efficiency</td>
+            <td>The code avoids unnecessary loops and redundant logic. However, performance can be optimized by using more efficient methods for finding elements.</td>
+            <td>16</td>
+        </tr>
+        <tr>
+            <td>Error Handling</td>
+            <td>Error handling is missing. The code does not handle exceptions gracefully with meaningful messages and proper use of try-catch/finally or logging.</td>
+            <td>6</td>
+        </tr>
+        <tr>
+            <td>Maintainability</td>
+            <td>The code is not modular, and reusability is limited. It can be improved by breaking it down into smaller, more manageable methods.</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td>Best Practices & Standards</td>
+            <td>The code follows some Java best practices, but it lacks proper imports, dependency management, and adherence to SOLID principles.</td>
+            <td>12</td>
+        </tr>
+    </table>
+    <div class="summary">
+        <h3>Overall Score: 58 / 100</h3>
+        <h3>Improvement Areas:</h3>
+        <ul>
+            <li>Add comments or documentation to improve code readability.</li>
+            <li>Implement error handling to handle exceptions and provide meaningful messages.</li>
+            <li>Break down the code into smaller, more manageable methods to improve maintainability.</li>
+            <li>Follow Java best practices, including SOLID principles and proper dependency management.</li>
+            <li>Optimize performance by using more efficient methods for finding elements.</li>
+        </ul>
+        <h3>Summary:</h3>
+        <p>The code functions correctly but lacks robustness, maintainability, and adherence to best practices. Significant improvements are needed to enhance production readiness.</p>
+    </div>
+</div>
